@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Audit IA ITICIA — 1 journée (Diagnostic approfondi)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f3f8; color: #1c2b3a; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 16px; }
+  .card { background: #fff; border-radius: 14px; padding: 26px; box-shadow: 0 4px 20px rgba(20,40,80,.08); margin-bottom: 16px; }
+  .brand { text-align: center; padding: 20px 0 6px; }
+  .brand h1 { color: #1a3c6e; font-size: 24px; }
+  .brand .sub { color: #5b7186; font-size: 14px; margin-top: 4px; }
+  .badge { display: inline-block; background: #1a3c6e; color: #fff; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 14px; border-radius: 20px; margin-bottom: 10px; }
+  .steps { display: flex; gap: 6px; margin: 16px 0 4px; flex-wrap: wrap; }
+  .steps div { flex: 1; min-width: 110px; text-align: center; font-size: 13px; font-weight: 600; padding: 9px 6px; background: #e2e9f2; color: #5b7186; border-radius: 8px; cursor: pointer; }
+  .steps div.on { background: #1a3c6e; color: #fff; }
+  .steps div.done { background: #7fb2e0; color: #fff; }
+  .progress { height: 8px; background: #e2e9f2; border-radius: 4px; overflow: hidden; margin: 12px 0; }
+  .progress > div { height: 100%; background: linear-gradient(90deg,#1a3c6e,#3a6ea5); width: 0%; transition: width .3s; }
+  .dim-tag { font-size: 13px; color: #fff; background: #3a6ea5; display: inline-block; padding: 4px 12px; border-radius: 14px; margin-bottom: 12px; }
+  .q-title { font-size: 19px; font-weight: 600; line-height: 1.45; margin-bottom: 14px; }
+  .note { font-size: 13.5px; color: #5b7186; line-height: 1.55; background: #f4f8fd; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; }
+  .opt { display: block; border: 1.8px solid #d5deea; border-radius: 10px; padding: 12px 15px; margin-bottom: 10px; cursor: pointer; font-size: 15.5px; transition: all .15s; background: #fff; }
+  .opt:hover { border-color: #3a6ea5; background: #f4f8fd; }
+  .opt.sel { border-color: #1a3c6e; background: #e8f0fa; font-weight: 600; }
+  .btn { background: #1a3c6e; color: #fff; border: none; padding: 13px 26px; font-size: 16px; border-radius: 9px; cursor: pointer; font-weight: 600; }
+  .btn:disabled { background: #b9c6d6; cursor: not-allowed; }
+  .btn.back { background: transparent; color: #1a3c6e; border: 1.5px solid #1a3c6e; }
+  .btn.red { background: #c0392b; }
+  .btnrow { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .hidden { display: none; }
+  input, select { font-size: 15px; padding: 9px 12px; border: 1.5px solid #d5deea; border-radius: 8px; }
+  .frow { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; align-items: center; }
+  .frow input, .frow select { flex: 1; min-width: 130px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  th { background: #1a3c6e; color: #fff; padding: 8px; text-align: left; }
+  td { border-bottom: 1px solid #e2e9f2; padding: 7px 8px; }
+  .rw { background: #eafaf0 !important; }
+  .dimbar { margin: 13px 0; }
+  .dimbar .lbl { display: flex; justify-content: space-between; font-size: 14.5px; font-weight: 600; margin-bottom: 5px; }
+  .dimbar .track { height: 12px; background: #e2e9f2; border-radius: 6px; overflow: hidden; }
+  .dimbar .fill { height: 100%; background: #1a3c6e; border-radius: 6px; transition: width .5s; }
+  .reco { background: #f4f8fd; border-left: 5px solid #1a3c6e; padding: 13px 15px; border-radius: 0 10px 10px 0; font-size: 14.5px; line-height: 1.6; margin: 10px 0; }
+  .score-big { text-align: center; margin: 6px 0 16px; }
+  .score-big .num { font-size: 52px; font-weight: 800; color: #1a3c6e; }
+  .score-big .lvl { font-size: 17px; color: #fff; background: #c0392b; display: inline-block; padding: 6px 18px; border-radius: 20px; font-weight: 700; }
+  .matx { display: grid; grid-template-columns: 60px 1fr 1fr 1fr; gap: 4px; margin: 14px 0; }
+  .matx .cell { border-radius: 8px; padding: 10px; min-height: 74px; font-size: 12.5px; background: #f4f8fd; border: 1px dashed #c6d4e6; }
+  .matx .cell h4 { font-size: 12.5px; margin-bottom: 5px; }
+  .matx .qq { background: #fff7e6; border: 1.5px solid #e5b93c; }
+  .matx .st { background: #fdeeee; border: 1.5px solid #d98880; }
+  @media print { .noprint { display: none; } body { background: #fff; } .card { box-shadow: none; border: 1px solid #ccc; } .steps { display: none; } }
+
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+  @media (max-width: 640px) { .mode-grid { grid-template-columns: 1fr; } }
+  .mode-btn { border: 2px solid #d5deea; border-radius: 12px; padding: 20px 16px; cursor: pointer; text-align: left; background: #fff; transition: all .15s; }
+  .mode-btn:hover { border-color: #1a3c6e; background: #f4f8fd; }
+  .mode-btn .t { font-size: 17px; font-weight: 700; color: #1a3c6e; margin-bottom: 6px; }
+  .mode-btn .d { font-size: 13.5px; color: #5b7186; line-height: 1.5; }
+  .tipbar { background: #fff8e1; border-left: 4px solid #f0a500; padding: 10px 14px; font-size: 13.5px; color: #6b5518; border-radius: 0 8px 8px 0; margin-bottom: 14px; line-height: 1.55; }
+  .codebox { background: #1c2b3a; color: #7fd1a0; font-family: monospace; font-size: 12px; padding: 14px; border-radius: 10px; word-break: break-all; margin: 10px 0; line-height: 1.5; }
+  textarea.paste { width: 100%; min-height: 90px; padding: 12px; border: 1.5px solid #d5deea; border-radius: 8px; font-family: monospace; font-size: 12px; }
+  .err { color: #c0392b; font-size: 14px; font-weight: 600; margin-top: 8px; }
+  .reco.dig { background: #fdf2f0; border-left-color: #c0392b; }
+  .reco.dig b { color: #c0392b; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="badge">Consortium ITICIA — Université de Lyon</div>
+    <h1>Audit IA — 1 journée</h1>
+    <div class="sub">Diagnostic approfondi · Cartographie · Cas d'usage · Feuille de route</div>
+  </div>
+
+
+  <div class="steps noprint" id="stepsnav">
+    <div id="st0" class="on" onclick="go(0)">1. Diagnostic</div>
+    <div id="st1" onclick="go(1)">2. Cartographie</div>
+    <div id="st2" onclick="go(2)">3. Matrice ROI</div>
+    <div id="st3" onclick="go(3)">4. Feuille de route</div>
+  </div>
+
+  <!-- CHOIX DU MODE -->
+  <div class="card" id="modecard">
+    <div class="q-title">Qui êtes-vous ?</div>
+    <div class="mode-grid">
+      <div class="mode-btn" onclick="pickMode('client')">
+        <div class="t">🎯 Je suis le dirigeant / la dirigeante</div>
+        <div class="d">Je remplis le pré-diagnostic en amont de l'audit (10 minutes). À la fin, j'envoie mon code de restitution à l'auditeur ITICIA.</div>
+      </div>
+      <div class="mode-btn" onclick="pickMode('anim')">
+        <div class="t">🧑‍🏫 Je suis l'auditeur ITICIA</div>
+        <div class="d">Je charge le pré-diagnostic du dirigeant via son code, ou je mène l'audit complet en séance avec les ateliers.</div>
+      </div>
+    </div></div>
+
+  <!-- ÉTAPE 0 : DIAGNOSTIC 25 QUESTIONS -->
+  <div id="phase0">
+    <div class="card hidden" id="idcard">
+      <div class="q-title">Avant de commencer</div>
+      <div class="frow">
+        <input id="cname" placeholder="Entreprise / Organisation" style="flex:2"/>
+        <input id="cpers" placeholder="Personnes présentes"/>
+        <input id="cdate" placeholder="Date"/>
+      </div>
+      <p class="note" id="idnote"></p>
+      <div id="pastewrap2" class="hidden" style="margin-top:16px;border-top:1px dashed #d5deea;padding-top:14px;">
+        <p style="font-size:14px;color:#3c4f63;margin-bottom:8px;">📋 <b>Le dirigeant a déjà envoyé son code de pré-diagnostic ?</b> Collez-le ici — son diagnostic complet s'affichera instantanément avec les axes à creuser :</p>
+        <textarea id="codein" placeholder="ITICIA-J1-..." style="width:100%;min-height:70px;padding:10px;border:1.5px solid #d5deea;border-radius:8px;font-size:13px;font-family:monospace;"></textarea>
+        <div id="pasteerr" class="hidden" style="color:#c0392b;font-size:13.5px;margin-top:6px;"></div>
+        <div class="btnrow"><span></span><button class="btn" onclick="loadCode()">Charger le diagnostic →</button></div>
+      </div>
+      <div class="btnrow"><span></span><button class="btn" id="startbtn" onclick="startQ()">Commencer le diagnostic →</button></div>
+    </div>
+    <div class="card hidden" id="qcard">
+      <div class="progress"><div id="pbar"></div></div>
+      <div class="dim-tag" id="dimname"></div>
+      <div id="tipzone"></div>
+      <div class="q-title" id="qtext"></div>
+      <div id="opts"></div>
+      <div class="btnrow">
+        <button class="btn back" onclick="nav(-1)">← Précédent</button>
+        <button class="btn" id="nextb" onclick="nav(1)" disabled>Suivant →</button>
+      </div>
+    </div>
+  </div>
+
+    <!-- GUIDE D'ENTRETIEN EN SÉANCE (auditeur avec code) -->
+    <div class="card hidden" id="iguide">
+      <div class="q-title">Constat du pré-diagnostic — <span id="igname"></span></div>
+      <p class="note">Scores issus du questionnaire rempli en amont par le dirigeant. Le guide d'entretien ci-dessous s'appuie sur ce constat : dimensions faibles en premier, avec des questions différentes du pré-diagnostic.</p>
+      <div id="prescore"></div>
+    </div>
+    <div class="card hidden" id="iguide2">
+      <div class="q-title">Guide d'entretien — questions de séance</div>
+      <p class="note">🎙️ Menez l'entretien dimension par dimension (faibles en premier). Notez les constats dans chaque zone de texte — ils alimenteront la synthèse finale.</p>
+      <div id="igblocks"></div>
+      <div class="btnrow"><span></span><button class="btn" onclick="collectNotes(); go(1)">→ Étape suivante : Atelier cartographie</button></div>
+    </div>
+
+  <!-- ÉTAPE 1 : CARTOGRAPHIE -->
+  <div id="phase1" class="hidden">
+    <div class="card">
+      <div class="q-title">Module 3 — Cartographie des processus métier</div>
+      <p class="note">🎙️ <b>Animation :</b> listez avec les participants les tâches récurrentes de chaque service. Pour chacune : fréquence, temps par semaine, et potentiel IA (estimé ensemble). Ajoutez au moins 5-10 tâches.</p>
+      <div class="frow">
+        <input id="ttask" placeholder="Tâche récurrente (ex: saisie des bons de commande)" style="flex:2"/>
+        <input id="tserv" placeholder="Service"/>
+        <select id="tfreq">
+          <option value="quot">Quotidienne</option><option value="hebdo">Hebdomadaire</option>
+          <option value="mensuel">Mensuelle</option><option value="an">Annuelle</option>
+        </select>
+        <input id="ttime" type="number" min="0" placeholder="Heures/sem"/>
+        <button class="btn" onclick="addTask()">+ Ajouter</button>
+      </div>
+      <div id="tasktable"></div>
+      <div id="tasksave" class="reco hidden"></div>
+      <div class="btnrow"><span></span><button class="btn" onclick="go(2)">Étape suivante : Matrice ROI →</button></div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 2 : MATRICE ROI -->
+  <div id="phase2" class="hidden">
+    <div class="card">
+      <div class="q-title">Module 5 — Priorisation des cas d'usage</div>
+      <p class="note">🎙️ <b>Animation :</b> reprenez chaque tâche cartographiée (ou les cas d'usage imaginés). Évaluez ensemble : <b>impact</b> (1=faible, 3=fort) et <b>effort</b> de mise en œuvre (1=faible, 3=fort). Les quick wins se placent en haut à gauche.</p>
+      <div id="roiempty" class="note">Ajoutez d'abord des tâches dans l'étape Cartographie.</div>
+      <div id="roibox"></div>
+      <div class="btnrow"><button class="btn back" onclick="go(1)">← Cartographie</button><button class="btn" onclick="go(3)">Étape suivante : Feuille de route →</button></div>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 3 : SYNTHÈSE / FEUILLE DE ROUTE -->
+  <div id="phase3" class="hidden">
+    <div class="card">
+      <div class="q-title">Synthèse du diagnostic approfondi</div>
+      <div id="resmeta" style="font-size:14px;color:#5b7186;margin-bottom:8px;"></div>
+      <div class="score-big"><div class="num" id="scorenum"></div><div class="lvl" id="scorelvl"></div></div>
+      <div id="dimbars"></div>
+      <div id="digzone"></div><div id="noteszone"></div>
+      <div id="codezone"></div>
+    </div>
+    <div class="card" id="roadmapcard">
+      <div class="q-title">Feuille de route — 3 horizons</div>
+      <p class="note">✍️ Complétez avec le client pendant la restitution :</p>
+      <table>
+        <tr><th style="width:110px">0-3 mois</th><td><b>Quick wins :</b> <span id="frquick"></span></td></tr>
+        <tr><th>3-6 mois</th><td><b>Cas d'usage structurants :</b> <span id="frmid"></span></td></tr>
+        <tr><th>6-12 mois</th><td><b>Projets de transformation :</b> <input id="frlong" placeholder="À définir ensemble" style="width:95%"/></td></tr>
+      </table>
+      <div class="reco" id="lvlreco"></div>
+      <div class="reco">💰 <b>Ingénierie financière :</b> parcours éligibles au financement <b>OPCO</b> (selon statut et convention collective) et aux dispositifs <b>France 2030 / Région AURA</b>. Le chargé d'affaires ITICIA monte le dossier avec vous : estimation du reste à charge ~0-20% selon éligibilité.</div>
+      <div class="reco">🎓 <b>Parcours suggérés (Label IA) :</b> voir la recommandation de niveau ci-dessus. Les niveaux se déroulent progressivement : Sensibilisation → Utilisation → Application → Expertise.</div>
+      <div class="btnrow noprint" style="margin-top:16px;">
+        <button class="btn back" onclick="location.reload()">↺ Nouvel audit</button>
+        <button class="btn red" onclick="window.print()">🖨️ Imprimer le rapport / PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DIMS = [
+ {name:'1. Culture & Usages'},
+ {name:'2. Données & SI'},
+ {name:'3. Processus & Automatisation'},
+ {name:'4. Compétences & Organisation'},
+ {name:'5. Gouvernance, RGPD & Sécurité'}
+];
+const QS = [
+ {d:0,q:"Comment l'IA est-elle perçue par la direction et les salariés ?",a:["Rejet ou crainte","Curiosité sans usage","Usage réel dans quelques équipes","Usage courant et assumé"]},
+ {d:0,q:"L'IA figure-t-elle dans vos objectifs stratégiques ou votre projet d'entreprise ?",a:["Non","En discussion","Un axe identifié","Un objectif chiffré avec pilote"]},
+ {d:0,q:"Avez-vous déjà mesuré des gains apportés par un outil IA ?",a:["Aucun usage mesurable","Des ressentis positifs, non chiffrés","Un premier gain chiffré","Des gains suivis par des indicateurs"]},
+ {d:0,q:"Existe-t-il des usages IA « sauvages » non encadrés (outils perso des salariés) ?",a:["Oui, beaucoup et sans contrôle","Quelques-uns","Encadrés par des règles","Aucun : tous les usages passent par des outils validés"]},
+ {d:0,q:"Faites-vous une veille sur l'IA et les innovations de votre secteur ?",a:["Aucune","Informelle via les salariés","Quelques sources suivies","Veille structurée et partagée"]},
+ {d:1,q:"Comment sont historisées vos données (clients, ventes, production, RH) ?",a:["Papier / fichiers dispersés","Fichiers locaux par poste","Outils partagés partiellement","Base centralisée (CRM/ERP/SI)"]},
+ {d:1,q:"Quelle est la qualité de vos données ?",a:["Hétérogène, doublons, erreurs fréquentes","Fiabilité variable","Bonne sur les activités principales","Contrôlée et documentée"]},
+ {d:1,q:"Vos données sont-elles accessibles/exportables (API, exports standards) ?",a:["Non, enfermées","Exports manuels possibles","Formats standards disponibles","API et interconnexions en place"]},
+ {d:1,q:"Le volume de vos données vous paraît-il exploitable par l'IA ?",a:["Trop peu de données numérisées","Volume faible mais utilisable","Volume correct","Volume important et structuré"]},
+ {d:1,q:"Qui a accès à quelles données dans l'entreprise ?",a:["Aucune gestion fine","Gestion informelle","Droits gérés par outil","Politique d'accès formalisée"]},
+ {d:2,q:"Vos processus clés sont-ils cartographiés/décrits ?",a:["Non","Informellement","Principaux processus documentés","Cartographie à jour"]},
+ {d:2,q:"Combien de processus sont déjà automatisés (hors IA) ?",a:["Aucun","Un ou deux","Plusieurs","Beaucoup, avec des indicateurs de suivi"]},
+ {d:2,q:"Quelles tâches répétitives pèsent le plus sur vos équipes ?",a:["Saisie et copier-coller (lourd)","Relances clients/fournisseurs","Reporting et consolidation","Tâches analytiques répétitives"]},
+ {d:2,q:"Avez-vous déjà identifié des tâches que l'IA pourrait prendre en charge ?",a:["Non","Intuitivement, sans méthode","Une liste existe","Évaluées avec gains estimés"]},
+ {d:2,q:"Votre SI permet-il d'intégrer des outils externes (connecteurs, API) ?",a:["Non / SI vieillissant","Cas par cas","Oui sur les outils principaux","Architecture ouverte"]},
+ {d:3,q:"Quel est le niveau de maîtrise des outils numériques des équipes ?",a:["Hétérogène et faible","Correct sur les usages de base","Bon avec des référents","Élevé et continu"]},
+ {d:3,q:"Avez-vous un plan de formation ou de développement des compétences ?",a:["Non","Informel au cas par cas","Un plan généraliste","Un plan incluant le numérique/IA"]},
+ {d:3,q:"Y a-t-il des collaborateurs formés à l'IA (formel ou autodidactes) ?",a:["Aucun","Un ou deux autodidactes","Quelques personnes formées","Un vivier identifié et mobilisé"]},
+ {d:3,q:"Comment gérez-vous le changement (nouvel outil, nouvelle méthode) ?",a:["Difficilement, forte résistance","Avec accompagnement ponctuel","Avec conduite du changement structurée","Culture d'amélioration continue"]},
+ {d:3,q:"Auriez-vous une personne capable de porter un projet IA en interne ?",a:["Aucune","Peut-être, à former","Oui, une personne ressource","Oui, plusieurs (fonction dédiée)"]},
+ {d:4,q:"Où en êtes-vous sur le RGPD (registre, procédures, référent) ?",a:["Rien de formalisé","Quelques bases","Registre à jour","Référent et procédures actives"]},
+ {d:4,q:"Avez-vous des règles sur les données confidentielles face aux IA génératives ?",a:["Aucune règle","Interdiction informelle","Règles internes écrites","Charte + outils conformes (données non envoyées hors entreprise)"]},
+ {d:4,q:"Comment assurez-vous la sécurité informatique (accès, sauvegardes, MDP) ?",a:["Très basique","Antivirus + sauvegardes ponctuelles","Politique de sécurité existante","Sécurité gérée et auditée"]},
+ {d:4,q:"La question de la souveraineté des données (où sont hébergées les données IA) vous semble-t-elle importante ?",a:["Jamais pensé","Préoccupation vague","Sujet identifié","Exigence dans les choix d'outils"]},
+ {d:4,q:"Un incident lié aux données (fuite, mauvais usage de l'IA) serait-il géré ?",a:["Aucune procédure","Improvisation","Une procédure générale existe","Procédure spécifique testée"]}
+];
+let cur = -1, answers = new Array(QS.length).fill(null), tasks = [];
+
+function go(n){
+  if (n > 0 && cur >= 0 && cur < QS.length && answers.includes(null) && n === 3) {
+    const missing = answers.filter(a => a === null).length;
+    if (missing > 0 && !confirm('Il reste ' + missing + ' question(s) sans réponse. Continuer quand même vers la synthèse ?')) return;
+  }
+  for (let i = 0; i < 4; i++) {
+    const ph = document.getElementById('phase' + i);
+    if (i === n) ph.classList.remove('hidden'); else ph.classList.add('hidden');
+    document.getElementById('st' + i).className = i === n ? 'on' : (i < n ? 'done' : '');
+  }
+  if (n === 2) buildROI();
+  if (n === 3) results();
+  window.scrollTo(0, 0);
+}
+function startQ(){ document.getElementById('qcard').classList.remove('hidden'); document.querySelectorAll('#phase0 .card')[0].classList.add('hidden'); cur = 0; show(); }
+function show(){
+  const q = QS[cur];
+  document.getElementById('dimname').textContent = DIMS[q.d].name;
+  document.getElementById('tipzone').innerHTML = (MODE === 'anim') ? '<div class="tipbar">💡 <b>Animation :</b> ' + TIPS[cur] + '</div>' : '';
+  document.getElementById('qtext').textContent = q.q;
+  const box = document.getElementById('opts'); box.innerHTML = '';
+  q.a.forEach((txt, i) => {
+    const el = document.createElement('div');
+    el.className = 'opt' + (answers[cur] === i ? ' sel' : '');
+    el.textContent = txt;
+    el.onclick = () => { answers[cur] = i; [...box.children].forEach(c => c.classList.remove('sel')); el.classList.add('sel'); document.getElementById('nextb').disabled = false; };
+    box.appendChild(el);
+  });
+  document.getElementById('nextb').disabled = answers[cur] === null;
+  document.getElementById('nextb').textContent = cur === QS.length - 1 ? 'Fin du diagnostic → Résultats' : 'Suivant →';
+  document.getElementById('pbar').style.width = (cur / QS.length * 100) + '%';
+}
+function nav(dir){
+  if (dir === 1 && answers[cur] === null) return;
+  if (dir === 1 && cur === QS.length - 1) { if (MODE === 'client') clientEnd(); else go(1); return; }
+  cur = Math.min(QS.length - 1, Math.max(0, cur + dir)); show();
+}
+function addTask(){
+  const t = document.getElementById('ttask').value.trim();
+  const s = document.getElementById('tserv').value.trim();
+  const f = document.getElementById('tfreq').value;
+  const h = parseFloat(document.getElementById('ttime').value) || 0;
+  if (!t) { alert('Indiquez au moins la tâche.'); return; }
+  tasks.push({t, s, f, h});
+  document.getElementById('ttask').value = ''; document.getElementById('tserv').value = ''; document.getElementById('ttime').value = '';
+  renderTasks();
+}
+function delTask(i){ tasks.splice(i, 1); renderTasks(); buildROI(); }
+function renderTasks(){
+  let html = '<table><tr><th>Tâche</th><th>Service</th><th>Fréquence</th><th>h/sem</th><th>Potentiel IA</th><th class="noprint"></th></tr>';
+  tasks.forEach((x, i) => {
+    const sel = ['non','peut','oui'].includes(x.ai) ? x.ai : '';
+    html += `<tr><td>${x.t}</td><td>${x.s || '—'}</td><td>${x.f}</td><td>${x.h || '—'}</td>
+      <td><select onchange="setAI(${i}, this.value)">
+        <option value="" ${sel === '' ? 'selected' : ''}>— à évaluer</option>
+        <option value="non" ${sel === 'non' ? 'selected' : ''}>Faible</option>
+        <option value="peut" ${sel === 'peut' ? 'selected' : ''}>Moyen</option>
+        <option value="oui" ${sel === 'oui' ? 'selected' : ''}>Fort</option></select></td>
+      <td class="noprint"><button class="btn back" style="padding:4px 10px" onclick="delTask(${i})">✕</button></td></tr>`;
+  });
+  html += '</table>';
+  document.getElementById('tasktable').innerHTML = html;
+  const total = tasks.reduce((a, x) => a + x.h, 0);
+  const elig = tasks.filter(x => x.ai === 'oui').reduce((a, x) => a + x.h, 0);
+  const sv = document.getElementById('tasksave');
+  if (tasks.length) {
+    sv.classList.remove('hidden');
+    const annuel = Math.round(total * 46);
+    const annuelElig = Math.round(elig * 46);
+    const fr = new Intl.NumberFormat('fr-FR');
+    sv.innerHTML = `⏱️ <b>Temps identifié sur tâches récurrentes : ${fr.format(total)} h/semaine</b> (~${fr.format(annuel)} h/an).
+      Potentiel IA fort : ${fr.format(elig)} h/sem → si l'IA en traite 30 à 50%, gain estimé entre <b>${fr.format(Math.round(annuelElig * .3))} et ${fr.format(Math.round(annuelElig * .5))} heures/an</b>.`;
+  } else sv.classList.add('hidden');
+}
+function setAI(i, v){ tasks[i].ai = v; renderTasks(); }
+function buildROI(){
+  const box = document.getElementById('roibox');
+  const candidates = tasks.filter(t => t.ai === 'oui' || t.ai === 'peut' || !t.ai);
+  if (!candidates.length) { box.innerHTML = ''; return; }
+  let html = '<table><tr><th>Cas d\'usage</th><th>Impact (1-3)</th><th>Effort (1-3)</th></tr>';
+  candidates.forEach((x, i) => {
+    const idx = tasks.indexOf(x);
+    html += `<tr><td>${x.t}${x.ai === 'peut' ? ' <i>(potentiel moyen)</i>' : ''}</td>
+      <td><select onchange="setRoi(${idx},'i',this.value)"><option value="">—</option><option ${x.ri == 1 ? 'selected' : ''} value="1">1 — faible</option><option ${x.ri == 2 ? 'selected' : ''} value="2">2 — moyen</option><option ${x.ri == 3 ? 'selected' : ''} value="3">3 — fort</option></select></td>
+      <td><select onchange="setRoi(${idx},'e',this.value)"><option value="">—</option><option ${x.re == 1 ? 'selected' : ''} value="1">1 — faible</option><option ${x.re == 2 ? 'selected' : ''} value="2">2 — moyen</option><option ${x.re == 3 ? 'selected' : ''} value="3">3 — fort</option></select></td></tr>`;
+  });
+  html += '</table>';
+  const quads = {hi_he: [], hi_le: [], lo: []};
+  candidates.forEach(x => {
+    if (x.ri && x.re) {
+      const high = x.ri >= 2;
+      const easy = x.re <= 2;
+      if (high && easy) quads.hi_le.push(x.t);
+      else if (high && !easy) quads.hi_he.push(x.t);
+      else quads.lo.push(x.t);
+    }
+  });
+  html += `<div class="matx">
+    <div></div><div><b>Effort FAIBLE</b></div><div><b>Effort MOYEN</b></div><div><b>Effort FORT</b></div>
+    <div style="align-self:center"><b>IMPACT FORT</b></div>
+    <div class="cell qq"><h4>🚀 Quick wins</h4>${quads.hi_le.join('<br>') || '<i>—</i>'}</div>
+    <div class="cell"><h4>⚖️ À arbitrer</h4><i>—</i></div>
+    <div class="cell st"><h4>🏗️ Projets structurants</h4>${quads.hi_he.join('<br>') || '<i>—</i>'}</div>
+    <div style="align-self:center"><b>IMPACT FAIBLE</b></div>
+    <div class="cell" style="grid-column:2/5"><h4>⏳ À plus tard ou à écarter</h4>${quads.lo.join('<br>') || '<i>—</i>'}</div>
+  </div>`;
+  box.innerHTML = html;
+  document.getElementById('frquick').textContent = quads.hi_le.length ? quads.hi_le.join(' · ') : '(à définir)';
+  document.getElementById('frmid').textContent = quads.hi_he.length ? quads.hi_he.join(' · ') : '(à définir)';
+}
+function setRoi(i, k, v){ tasks[i]['r' + k] = parseInt(v); buildROI(); }
+function score(){
+  const ds = DIMS.map((d, di) => {
+    const qs = QS.map((q, qi) => qi).filter(qi => QS[qi].d === di);
+    return { max: qs.length * 3, val: qs.reduce((a, qi) => a + answers[qi], 0) };
+  });
+  const total = ds.reduce((a, d) => a + d.val, 0), max = ds.reduce((a, d) => a + d.max, 0);
+  return { ds, pct: total / max * 100 };
+}
+function levelOf(p){
+  if (p < 30) return {n:'Découverte', r:"<b>Recommandation :</b> démarrer par le <b>Label IA Niveau 1 — Sensibilisation</b> (dirigeants + collaborateurs), sécuriser les bases RGPD, puis 1-2 quick wins visibles pour embarquer les équipes."};
+  if (p < 55) return {n:'Émergent', r:"<b>Recommandation :</b> <b>Niveau 1</b> pour les non-couverts, <b>Niveau 2 — Utilisation</b> pour les équipes opérationnelles sur les cas d'usage quick wins identifiés. Mesurer chaque gain obtenu."};
+  if (p < 75) return {n:'Structuré', r:"<b>Recommandation :</b> <b>Niveau 3 — Application</b> pour les chefs de projet et profils tech : intégrer des briques IA concrètes dans le SI. Déployer les cas d'usage structurants avec suivi ROI."};
+  return {n:'Avancé', r:"<b>Recommandation :</b> <b>Niveau 4 — Expertise</b> (LLM locaux, RAG, modèles frugaux) pour industrialiser la souveraineté IA. Déployer la charte IA et l'auditabilité des usages."};
+}
+function results(){
+  const s = score(), lvl = levelOf(s.pct);
+  document.getElementById('resmeta').textContent =
+    (document.getElementById('cname').value || '—') + ' · ' + (document.getElementById('cpers').value || '—') + ' · ' + (document.getElementById('cdate').value || '—');
+  document.getElementById('scorenum').textContent = Math.round(s.pct) + ' / 100';
+  document.getElementById('scorelvl').textContent = 'Maturité : ' + lvl.n;
+  let bars = '';
+  s.ds.forEach((d, i) => {
+    const p = d.val / d.max * 100;
+    const com = p < 34 ? 'Priorité haute' : p < 67 ? 'En construction' : 'Point fort';
+    bars += `<div class="dimbar"><div class="lbl"><span>${DIMS[i].name}</span><span>${Math.round(p)}% · ${com}</span></div><div class="track"><div class="fill" style="width:${p}%"></div></div></div>`;
+  });
+  document.getElementById('dimbars').innerHTML = bars;
+  // Axes à creuser (auditeur) : dimensions < 50%
+  if (MODE === 'anim') {
+    let digs = '<div class="q-title" style="font-size:17px;">À creuser pendant la séance</div>';
+    const weak = s.ds.map((d, i) => ({i, p: d.val / d.max * 100})).filter(x => x.p < 50).sort((a, b) => a.p - b.p);
+    weak.forEach(w => digs += '<div class="reco dig">' + DIGS[w.i].dig + ' <span style="color:#5b7186;">(score ' + Math.round(w.p) + '%)</span></div>');
+    if (!weak.length) digs += '<div class="reco">Aucune dimension critique : concentrez la séance sur les ateliers (cartographie, ROI) et le montage du plan de formation.</div>';
+    document.getElementById('digzone').innerHTML = digs;
+  }
+  // Code de restitution (dirigeant)
+  if (MODE === 'client') {
+    document.getElementById('codezone').innerHTML =
+      '<div class="reco" style="background:#eefaf0;border-left-color:#2e8b57;">' +
+      '✉️ <b>Code de restitution :</b> copiez ce code et envoyez-le à <b>Sully Capron (sully.capron@universite-lyon.fr)</b> avant l\'audit d\'une journée. L\'auditeur affichera votre diagnostic le jour J.' +
+      '<div class="codebox" id="thecode">' + buildCode() + '</div>' +
+      '<button class="btn" style="background:#2e8b57;" onclick="copyCode()">📋 Copier le code</button>' +
+      '<span id="copied" style="color:#2e8b57;font-weight:700;margin-left:10px;" class="hidden">✅ Copié !</span></div>';
+  }
+  let notesHtml = '';
+  if (dimNotes.filter(x => x).length) {
+    notesHtml = '<div class="q-title" style="font-size:17px;">Constats relevés en séance</div>';
+    DIMS.forEach((d, i) => { if (dimNotes[i]) notesHtml += '<div class="reco"><b>' + d.name + ' :</b> ' + dimNotes[i].replace(/\n/g, '<br>') + '</div>'; });
+  }
+  document.getElementById('noteszone').innerHTML = notesHtml;
+  document.getElementById('lvlreco').innerHTML = lvl.r;
+  document.getElementById('roadmapcard').style.display = (MODE === 'client') ? 'none' : '';
+}
+
+let MODE = null;
+let dimNotes = ['', '', '', '', ''];
+const TIPS = [
+"Faites préciser qui utilise quoi, avec quels comptes (perso/pro). Les craintes exprimées = points d'appui de l'acculturation.",
+"Si un axe est identifié : qui est le porteur ? Sans porteur nommé, l'objectif ne décollera pas.",
+"Poussez sur les ressentis : « concrètement, quel gain ? ». Distinguer ressenti / mesuré prépare la matrice ROI.",
+"Reliez à l'AI Act (art. 4, depuis le 02/02/2025 : littératie IA obligatoire). Usages sauvages = risque de fuite de données.",
+"Qui suit quoi ? Proposez la veille mutualisée ITICIA comme premier livrable facile.",
+"Faites citer l'outil par type de donnée (clients / ventes / RH). Un Excel sur un poste = gisement RAG après nettoyage.",
+"Demandez un exemple récent d'erreur due à une donnée fausse. L'anecdote marque plus que le score.",
+"Vérifiez les exports standards des éditeurs. Sans export ni API, l'automatisation passe par un chantier préalable.",
+"Peu de données numérisées ? Les cas d'usage seront « assistés » avant d'être « automatisés ». Ajustez les promesses.",
+"Test concret : qui peut exporter la base clients aujourd'hui ? Cette question prépare le module faisabilité données.",
+"Si rien de documenté, la cartographie du module suivant sera le premier livrable de valeur immédiate.",
+"Les automatisations existantes (même sous Excel) prouvent que l'entreprise sait outiller : capitalisez dessus.",
+"CHIFFREZ chaque exemple : fréquence × durée. C'est la matière directe de l'atelier cartographie.",
+"Si une liste de tâches IA existe, demandez-la : vous partez de leur travail, pas de zéro.",
+"SI vieillissant : orientez vers les outils no-code interfacés (Make / Zapier) avant l'API native.",
+"Repérez les écarts de niveau par service : ils dessinent les groupes de formation.",
+"Demandez l'OPCO et le reliquat de droits à la formation : argument décisif pour financer le parcours.",
+"Les autodidactes = ambassadeurs potentiels. Recensez-les pour un rôle de relais interne.",
+"Résistance forte : prévoyez un pilote court avec quick win visible avant tout déploiement large.",
+"C'est LA question du jour J : un porteur interne conditionne le Label IA Niveau 3.",
+"Positionnez le RGPD comme accélérateur de confiance (clients, salariés), pas comme contrainte.",
+"Proposez une charte IA simple (5 règles) : livrable rapide à forte valeur perçue.",
+"Vérifiez que les sauvegardes sont TESTÉES et les mots de passe pas partagés. La sécurité précède l'IA.",
+"Expliquez l'hébergement FR / local pour les données sensibles : argument différenciant ITICIA.",
+"L'absence de procédure incident = point d'entrée pour la gouvernance IA de la feuille de route."
+];
+const DIGS = [
+{dig:"<b>Axe à creuser en séance :</b> partir des usages personnels (qui a testé ChatGPT ?) pour créer le déclic, puis démo sur un cas de leur métier."},
+{dig:"<b>Axe à creuser en séance :</b> identifier les 2-3 gisements de données (clients, historique, catalogue) et évaluer leur qualité réelle."},
+{dig:"<b>Axe à creuser en séance :</b> lister au tableau 5-10 tâches répétitives chiffrées — matière première des quick wins de l'atelier cartographie."},
+{dig:"<b>Axe à creuser en séance :</b> cibler les porteurs internes de la formation et vérifier l'OPCO / le reliquat de droits."},
+{dig:"<b>Axe à creuser en séance :</b> construire une charte IA simple (5 règles) et le cadrage RGPD / AI Act comme livrable immédiat."}
+];
+/* ===== GUIDE D'ENTRETIEN EN SÉANCE =====
+Questions DIFFÉRENTES du pré-diagnostic, générées selon le constat du dirigeant. */
+const IG = [
+ {weak:["Votre pré-diagnostic montre que l'IA est encore peu présente : racontez-moi la dernière fois qu'un collaborateur a testé un outil IA — qu'est-ce qui s'est passé ?","Qu'est-ce qui vous fait le plus douter aujourd'hui : le coût, la sécurité des données, la peur de remplacer des gens, ou le « par où commencer » ?","Si un outil pouvait vous retirer UNE tâche pénible ce soir, laquelle choisiriez-vous ?"],
+  solid:["Vos équipes utilisent déjà l'IA : quel usage a le plus déçu jusqu'ici, et pourquoi à votre avis ?","Qui, dans l'entreprise, pourrait devenir ambassadeur IA auprès des autres ?","Quelle tâche jugée « impossible à automatiser » par vos équipes mériterait un essai quand même ?"]},
+ {weak:["Si je vous demandais la liste de vos 200 derniers clients dans 10 minutes, pourriez-vous la sortir ? De où ?","Quelles données vous embêtent le plus à gérer aujourd'hui (saisie, doublons, fichiers perdus) ?","Où sont vos données les plus précieuses, et qui d'autre que vous peut y accéder ?"],
+  solid:["Vos données sont plutôt bien organisées : quel outil aimeriez-vous y brancher si c'était possible ?","Avez-vous déjà exporté des données de votre CRM ou ERP pour un autre usage ? Comment s'est passée l'opération ?","Quelle donnée vous manque cruellement pour mieux vendre ou produire ?"]},
+ {weak:["Décrivez-moi votre journée type : à quel moment vous dites « encore cette corvée » ?","Quelles tâches repoussez-vous systématiquement en fin de semaine ?","Combien de temps prend, en minutes, votre devis ou votre facture type, de la demande à l'envoi ?"],
+  solid:["Quels processus vous restent à automatiser, et qu'est-ce qui l'a empêché jusqu'ici ?","Où perdez-vous du temps à raccorder des outils entre eux (copier-coller d'un logiciel à l'autre) ?","Quel process vos clients trouvent-ils lent ?"]},
+ {weak:["Dans vos équipes, qui est le plus à l'aise avec les outils numériques — et que les autres en pensent ?","Quand vous avez formé vos équipes (même sur autre chose), qu'est-ce qui a marché, qu'est-ce qui a dérapé ?","Si je proposais une formation courte et concrète, qui enverriez-vous en premier ?"],
+  solid:["Vos équipes sont plutôt à l'aise : sur quel sujet précis aimeraient-elles progresser maintenant ?","Qui pourrait animer une petite session interne de partage (15 minutes) sur l'IA ?","Qu'est-ce qui empêcherait vos collaborateurs de suivre une formation en pleine activité ?"]},
+ {weak:["Que faites-vous des données de vos clients quand un contrat se termine ?","Si un collaborateur colle des données clients dans ChatGPT ce soir, qui s'en rendrait compte ?","L'AI Act impose depuis février 2025 un niveau de compréhension IA de vos équipes : où vous situez-vous à vos yeux ?"],
+  solid:["Votre cadre est déjà solide : que faudrait-il pour le faire évoluer vers une vraie charte IA ?","Qui gère les accès aux données aujourd'hui, et comment vérifiez-vous qu'ils sont à jour ?","Avez-vous déjà reçu une demande RGPD d'un client (accès, suppression) ? Comment s'est-elle passée ?"]}
+];
+
+function collectNotes(){
+  DIMS.forEach((d, i) => { const el = document.getElementById('note' + i); dimNotes[i] = el ? (el.value || '').trim() : ''; });
+}
+
+function buildIG(){
+  const s = score();
+  document.getElementById('igname').textContent = (document.getElementById('cname').value || 'Client') + ' — ' + (document.getElementById('cdate').value || '');
+  const ps = document.getElementById('prescore');
+  ps.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;';
+  ps.innerHTML = '';
+  s.ds.forEach((d, i) => {
+    const p = d.val / d.max * 100;
+    const bg = p < 50 ? '#fdeeee' : (p < 75 ? '#fff6e0' : '#eef7ee');
+    const col = p < 50 ? '#c0392b' : (p < 75 ? '#b07d10' : '#2e8b57');
+    ps.innerHTML += '<div style="background:' + bg + ';border-radius:10px;padding:10px;text-align:center;flex:1;min-width:110px;"><div style="font-size:22px;font-weight:800;color:' + col + ';">' + Math.round(p) + '%</div><div style="font-size:11px;color:#5b7186;margin-top:3px;">' + DIMS[i].name + '</div></div>';
+  });
+  const order = s.ds.map((d, i) => ({ i: i, p: d.val / d.max * 100 })).sort((a, b) => a.p - b.p);
+  const blocks = document.getElementById('igblocks');
+  blocks.innerHTML = '';
+  order.forEach((o, rank) => {
+    const weak = o.p < 50;
+    const bank = IG[o.i][weak ? 'weak' : 'solid'];
+    let html = '<div style="border:1.5px solid ' + (weak ? '#f0b8b6' : '#b9d4b9') + ';border-radius:12px;padding:16px;margin:14px 0;background:' + (weak ? '#fffafa' : '#f9fcf9') + ';">';
+    html += '<h4 style="font-size:15.5px;color:#1a3c6e;">Palier ' + (rank + 1) + ' — ' + DIMS[o.i].name + ' (' + Math.round(o.p) + '%)</h4>';
+    html += '<div style="font-size:12.5px;font-weight:600;color:' + (weak ? '#c0392b' : '#4a7c4a') + ';margin-bottom:10px;">' + (weak ? '🔴 Dimension faible — questions de compréhension et de déclenchement' : '🟢 Dimension solide — questions d\u2019approfondissement') + '</div>';
+    bank.forEach(q => { html += '<div style="font-size:14.5px;margin:10px 0;padding-left:12px;border-left:3px solid #c8d8e8;line-height:1.5;">' + q + '</div>'; });
+    html += '<textarea id="note' + o.i + '" style="width:100%;min-height:64px;padding:10px 12px;border:1.5px solid #d5deea;border-radius:8px;font-size:14px;margin-top:8px;" placeholder="Notes / constats de séance..."></textarea>';
+    html += '</div>';
+    blocks.innerHTML += html;
+  });
+}
+
+function pickMode(m){
+  MODE = m;
+  document.getElementById('modecard').classList.add('hidden');
+  const idc = document.getElementById('idcard');
+  idc.classList.remove('hidden');
+  document.getElementById('idnote').innerHTML = (m === 'client')
+    ? "Pré-diagnostic <b>avant l'audit</b> : 25 questions (~10 min). À la fin, un <b>code de restitution</b> vous sera fourni — envoyez-le à votre auditeur ITICIA par e-mail."
+    : "🧑‍🏫 <b>Mode auditeur ITICIA.</b> Remplissez les champs, puis lancez le diagnostic en séance avec le dirigeant. <b>Si le dirigeant a déjà envoyé son code de pré-diagnostic</b> (commence par ITICIA-J1-), collez-le ci-dessous : le diagnostic complet s'affichera instantanément.";
+  document.getElementById('pastewrap2').classList.toggle('hidden', m !== 'anim');
+  document.getElementById('startbtn').textContent = (m === 'client') ? 'Commencer le pré-diagnostic →' : "Commencer l'audit en séance →";
+  if (m === 'anim') document.getElementById('stepsnav').style.display = '';
+}
+function showPaste(){}
+function clientEnd(){
+  document.getElementById('stepsnav').style.display = 'none';
+  go(3);
+}
+function loadCode(){
+  const raw = document.getElementById('codein').value.trim();
+  const err = document.getElementById('pasteerr');
+  try {
+    if (!raw.startsWith('ITICIA-J1-')) throw 0;
+    const obj = JSON.parse(decodeURIComponent(escape(atob(raw.slice(10)))));
+    if (!Array.isArray(obj.a) || obj.a.length !== QS.length) throw 0;
+    answers = obj.a.slice();
+    document.getElementById('cname').value = obj.n || '';
+    document.getElementById('cpers').value = obj.p || '';
+    document.getElementById('cdate').value = obj.d || '';
+    err.classList.add('hidden');
+    document.getElementById('modecard').classList.add('hidden');
+    document.getElementById('stepsnav').style.display = '';
+    document.getElementById('idcard').classList.add('hidden');
+    document.getElementById('qcard').classList.add('hidden');
+    document.getElementById('iguide').classList.remove('hidden');
+    document.getElementById('iguide2').classList.remove('hidden');
+    buildIG();
+  } catch (e) {
+    err.textContent = "Code illisible. Vérifiez qu'il a bien été copié en entier (il doit commencer par ITICIA-J1-).";
+    err.classList.remove('hidden');
+  }
+}
+function buildCode(){
+  const obj = { n: document.getElementById('cname').value, p: document.getElementById('cpers').value,
+                d: document.getElementById('cdate').value, a: answers };
+  return 'ITICIA-J1-' + btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+}
+function copyCode(){
+  const code = document.getElementById('thecode').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    document.getElementById('copied').classList.remove('hidden');
+  }).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = code; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove();
+    document.getElementById('copied').classList.remove('hidden');
+  });
+}
+</script>
+</body>
+</html>
