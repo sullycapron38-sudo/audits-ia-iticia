@@ -550,6 +550,7 @@ function copyCode(){
 <script>
 (function(){
   var rec = null, chunks = [], stream = null, t0 = 0, timer = null, marks = [], clientName = '';
+  var pausedTotal = 0, pausedAt = 0;
 
   function fmt(ms){
     var s = Math.floor(ms/1000), m = Math.floor(s/60), h = Math.floor(m/60);
@@ -568,13 +569,36 @@ function copyCode(){
       + '<b id="reclabel">Enregistrement</b>'
       + '<span id="rectime" style="font-variant-numeric:tabular-nums;opacity:.9;">00:00</span>'
       + '<button id="recmark" style="margin-left:auto;background:#1f4f78;color:#fff;border:0;border-radius:6px;padding:7px 12px;cursor:pointer;">Marquer</button>'
+      + '<button id="recpause" style="background:#e0a318;color:#1a1a1a;border:0;border-radius:6px;padding:7px 12px;cursor:pointer;font-weight:bold;">Pause</button>'
       + '<button id="recstop" style="background:#c0392b;color:#fff;border:0;border-radius:6px;padding:7px 12px;cursor:pointer;">Arrêter et télécharger</button>'
       + '<div id="recmarks" style="flex-basis:100%;font-size:11.5px;opacity:.85;"></div>';
     document.body.appendChild(bar);
     document.body.style.paddingBottom = '70px';
     document.getElementById('recstop').onclick = stop;
+    document.getElementById('recpause').onclick = function(){
+      if (!rec) return;
+      var b = this;
+      var dot = document.getElementById('recdot');
+      var lab = document.getElementById('reclabel');
+      if (rec.state === 'recording'){
+        rec.pause();
+        pausedAt = Date.now();
+        b.textContent = 'Reprendre';
+        b.style.background = '#2ecc71';
+        if (dot) dot.style.background = '#e0a318';
+        if (lab) lab.textContent = 'En pause';
+      } else if (rec.state === 'paused'){
+        rec.resume();
+        pausedTotal += Date.now() - pausedAt;
+        pausedAt = 0;
+        b.textContent = 'Pause';
+        b.style.background = '#e0a318';
+        if (dot) dot.style.background = '#e74c3c';
+        if (lab) lab.textContent = 'Enregistrement — ' + clientName;
+      }
+    };
     document.getElementById('recmark').onclick = function(){
-      var t = fmt(Date.now() - t0);
+      var t = fmt((pausedAt || Date.now()) - t0 - pausedTotal);
       marks.push(t);
       var box = document.getElementById('recmarks');
       box.textContent = 'Repères : ' + marks.join(' · ');
@@ -636,7 +660,7 @@ function copyCode(){
         rec.start(10000);
         var bar = ui();
         document.getElementById('recbar').querySelector('b').textContent = 'Enregistrement — ' + clientName;
-        timer = setInterval(function(){ document.getElementById('rectime').textContent = fmt(Date.now() - t0); }, 1000);
+        timer = setInterval(function(){ var el = document.getElementById('rectime'); if (!el) return; el.textContent = fmt((pausedAt || Date.now()) - t0 - pausedTotal); }, 1000);
       })
       .catch(function(e){
         console.warn('Micro refusé :', e);
