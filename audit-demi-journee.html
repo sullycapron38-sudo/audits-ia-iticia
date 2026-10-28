@@ -360,6 +360,7 @@ function loadCode(){
     document.getElementById('stepid').classList.add('hidden');
     buildIG();
     document.getElementById('iguide').classList.remove('hidden');
+    try { startAuditRecording(obj.n || (document.getElementById('cname').value||'')); } catch(e) {}
   } catch(e) {
     err.textContent = 'Code illisible ou incomplet. Vérifiez le copier-coller intégral du code.';
     err.classList.remove('hidden');
@@ -478,5 +479,108 @@ function copyCode(){
   alert('Code copié ! Collez-le dans votre e-mail à votre auditeur ITICIA.');
 }
 </script>
+
+<!-- ===== Module d'enregistrement d'audit (ajouté 28/10/2026) ===== -->
+<script>
+(function(){
+  var rec = null, chunks = [], stream = null, t0 = 0, timer = null, marks = [], clientName = '';
+
+  function fmt(ms){
+    var s = Math.floor(ms/1000), m = Math.floor(s/60), h = Math.floor(m/60);
+    function p(n){ return (n<10?'0':'')+n; }
+    return (h?h+':':'') + p(m%60) + ':' + p(s%60);
+  }
+
+  function ui(){
+    if (document.getElementById('recbar')) return document.getElementById('recbar');
+    var bar = document.createElement('div');
+    bar.id = 'recbar';
+    bar.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#0f2233;color:#fff;'
+      + 'padding:10px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;'
+      + 'font-family:Arial,Helvetica,sans-serif;font-size:13px;box-shadow:0 -2px 12px rgba(0,0,0,.25);';
+    bar.innerHTML = '<span id="recdot" style="width:11px;height:11px;border-radius:50%;background:#e74c3c;display:inline-block;"></span>'
+      + '<b id="reclabel">Enregistrement</b>'
+      + '<span id="rectime" style="font-variant-numeric:tabular-nums;opacity:.9;">00:00</span>'
+      + '<button id="recmark" style="margin-left:auto;background:#1f4f78;color:#fff;border:0;border-radius:6px;padding:7px 12px;cursor:pointer;">Marquer</button>'
+      + '<button id="recstop" style="background:#c0392b;color:#fff;border:0;border-radius:6px;padding:7px 12px;cursor:pointer;">Arrêter et télécharger</button>'
+      + '<div id="recmarks" style="flex-basis:100%;font-size:11.5px;opacity:.85;"></div>';
+    document.body.appendChild(bar);
+    document.body.style.paddingBottom = '70px';
+    document.getElementById('recstop').onclick = stop;
+    document.getElementById('recmark').onclick = function(){
+      var t = fmt(Date.now() - t0);
+      marks.push(t);
+      var box = document.getElementById('recmarks');
+      box.textContent = 'Repères : ' + marks.join(' · ');
+    };
+    return bar;
+  }
+
+  function pickMime(){
+    var opts = ['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg'];
+    for (var i=0;i<opts.length;i++){
+      if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(opts[i])) return opts[i];
+    }
+    return '';
+  }
+
+  function stop(){
+    if (!rec) return;
+    rec.stop();
+  }
+
+  window.startAuditRecording = function(name){
+    clientName = name || 'client';
+    if (rec && rec.state === 'recording') return;
+    if (!navigator.mediaDevices || !window.MediaRecorder){
+      console.warn('Enregistrement non supporté par ce navigateur');
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation:true, noiseSuppression:true, channelCount:1 } })
+      .then(function(s){
+        stream = s;
+        var mime = pickMime();
+        var cfg = { audioBitsPerSecond: 32000 };
+        if (mime) cfg.mimeType = mime;
+        rec = new MediaRecorder(stream, cfg);
+        chunks = []; marks = []; t0 = Date.now();
+        rec.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
+        rec.onstop = function(){
+          clearInterval(timer);
+          var type = (rec.mimeType || 'audio/webm');
+          var ext = type.indexOf('mp4') >= 0 ? 'm4a' : (type.indexOf('ogg') >= 0 ? 'ogg' : 'webm');
+          var blob = new Blob(chunks, { type: type });
+          var d = new Date();
+          function p(n){ return (n<10?'0':'')+n; }
+          var dateStr = d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate());
+          var slug = clientName.replace(/[^A-Za-z0-9_-]+/g,'-').replace(/^-|-$/g,'') || 'client';
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'Audit_' + slug + '_' + dateStr + '.' + ext;
+          document.body.appendChild(a); a.click(); a.remove();
+          if (stream) stream.getTracks().forEach(function(t){ t.stop(); });
+          var bar = document.getElementById('recbar');
+          if (bar){
+            bar.innerHTML = '<b>Enregistrement terminé</b> — fichier téléchargé : ' + a.download
+              + (marks.length ? '<br><span style="font-size:11.5px;opacity:.85;">Repères : ' + marks.join(' · ') + '</span>' : '')
+              + '<br><span style="font-size:11.5px;opacity:.85;">Envoyez ce fichier à Solene pour la synthèse.</span>';
+          }
+          rec = null;
+        };
+        rec.start(10000);
+        var bar = ui();
+        document.getElementById('recbar').querySelector('b').textContent = 'Enregistrement — ' + clientName;
+        timer = setInterval(function(){ document.getElementById('rectime').textContent = fmt(Date.now() - t0); }, 1000);
+      })
+      .catch(function(e){
+        console.warn('Micro refusé :', e);
+        var bar = ui();
+        bar.innerHTML = '<b>Micro non autorisé</b> — utilisez l\'enregistreur du téléphone (mode avion) et envoyez le fichier audio à Solene.';
+        setTimeout(function(){ var b = document.getElementById('recbar'); if (b) b.remove(); document.body.style.paddingBottom=''; }, 9000);
+      });
+  };
+})();
+</script>
+
 </body>
 </html>
