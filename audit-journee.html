@@ -465,6 +465,9 @@ const QCLOTURE = ["Si vous ne deviez retenir qu'un seul cas d'usage pour les 3 p
 function buildIG(){
   const s = score();
   document.getElementById('igname').textContent = (document.getElementById('cname').value || 'Client') + ' — ' + (document.getElementById('cdate').value || '');
+  var _tq = (typeof QBANK !== 'undefined') ? QBANK.reduce(function(a,b){return a+b.length;},0) : 0;
+  if (typeof QCLOTURE !== 'undefined') _tq += QCLOTURE.length;
+  document.getElementById('igname').textContent += '  ·  ' + _tq + ' questions (banque v2)';
   const ps = document.getElementById('prescore');
   ps.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;';
   ps.innerHTML = '';
