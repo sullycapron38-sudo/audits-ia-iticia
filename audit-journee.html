@@ -88,12 +88,12 @@
     <div class="q-title">Qui êtes-vous ?</div>
     <div class="mode-grid">
       <div class="mode-btn" onclick="pickMode('client')">
-        <div class="t">🎯 Je suis le dirigeant / la dirigeante</div>
-        <div class="d">Je remplis le pré-diagnostic en amont de l'audit (10 minutes). À la fin, j'envoie mon code de restitution à l'auditeur ITICIA.</div>
+        <div class="t">🎯 Je représente mon organisation</div>
+        <div class="d">RH, DSI, responsable de formation ou dirigeant : je remplis le pré-diagnostic en amont de l'audit (10 minutes) et j'envoie le code de restitution à l'auditeur ITICIA.</div>
       </div>
       <div class="mode-btn" onclick="pickMode('anim')">
         <div class="t">🧑‍🏫 Je suis l'auditeur ITICIA</div>
-        <div class="d">Je charge le pré-diagnostic du dirigeant via son code, ou je mène l'audit complet en séance avec les ateliers.</div>
+        <div class="d">Je charge le pré-pré-diagnostic de l'organisation via son code, ou je mène l'audit complet en séance avec les ateliers.</div>
       </div>
     </div></div>
 
@@ -108,7 +108,7 @@
       </div>
       <p class="note" id="idnote"></p>
       <div id="pastewrap2" class="hidden" style="margin-top:16px;border-top:1px dashed #d5deea;padding-top:14px;">
-        <p style="font-size:14px;color:#3c4f63;margin-bottom:8px;">📋 <b>Le dirigeant a déjà envoyé son code de pré-diagnostic ?</b> Collez-le ici — son diagnostic complet s'affichera instantanément avec les axes à creuser :</p>
+        <p style="font-size:14px;color:#3c4f63;margin-bottom:8px;">📋 <b>Le pré-diagnostic a déjà été rempli ?</b> Collez-le ici — son diagnostic complet s'affichera instantanément avec les axes à creuser :</p>
         <textarea id="codein" placeholder="ITICIA-J1-..." style="width:100%;min-height:70px;padding:10px;border:1.5px solid #d5deea;border-radius:8px;font-size:13px;font-family:monospace;"></textarea>
         <div id="pasteerr" class="hidden" style="color:#c0392b;font-size:13.5px;margin-top:6px;"></div>
         <div class="btnrow"><span></span><button class="btn" onclick="loadCode()">Charger le diagnostic →</button></div>
@@ -131,7 +131,7 @@
     <!-- GUIDE D'ENTRETIEN EN SÉANCE (auditeur avec code) -->
     <div class="card hidden" id="iguide">
       <div class="q-title">Constat du pré-diagnostic — <span id="igname"></span></div>
-      <p class="note">Scores issus du questionnaire rempli en amont par le dirigeant. Le guide d'entretien ci-dessous s'appuie sur ce constat : dimensions faibles en premier, avec des questions différentes du pré-diagnostic.</p>
+      <p class="note">Scores issus du questionnaire rempli en amont par l'organisation. Le guide d'entretien ci-dessous s'appuie sur ce constat : dimensions faibles en premier, avec des questions différentes du pré-diagnostic.</p>
       <div id="prescore"></div>
     </div>
     <div class="card hidden" id="iguide2">
@@ -385,7 +385,7 @@ function results(){
     if (!weak.length) digs += '<div class="reco">Aucune dimension critique : concentrez la séance sur les ateliers (cartographie, ROI) et le montage du plan de formation.</div>';
     document.getElementById('digzone').innerHTML = digs;
   }
-  // Code de restitution (dirigeant)
+  // Code de restitution (organisation)
   if (MODE === 'client') {
     document.getElementById('codezone').innerHTML =
       '<div class="reco" style="background:#eefaf0;border-left-color:#2e8b57;">' +
@@ -441,7 +441,7 @@ const DIGS = [
 {dig:"<b>Axe à creuser en séance :</b> construire une charte IA simple (5 règles) et le cadrage RGPD / AI Act comme livrable immédiat."}
 ];
 /* ===== GUIDE D'ENTRETIEN EN SÉANCE =====
-Questions DIFFÉRENTES du pré-diagnostic, générées selon le constat du dirigeant. */
+Questions DIFFÉRENTES du pré-diagnostic, générées selon le constat du pré-diagnostic. */
 const IG = [
  {weak:["Votre pré-diagnostic montre que l'IA est encore peu présente : racontez-moi la dernière fois qu'un collaborateur a testé un outil IA — qu'est-ce qui s'est passé ?","Qu'est-ce qui vous fait le plus douter aujourd'hui : le coût, la sécurité des données, la peur de remplacer des gens, ou le « par où commencer » ?","Si un outil pouvait vous retirer UNE tâche pénible ce soir, laquelle choisiriez-vous ?"],
   solid:["Vos équipes utilisent déjà l'IA : quel usage a le plus déçu jusqu'ici, et pourquoi à votre avis ?","Qui, dans l'entreprise, pourrait devenir ambassadeur IA auprès des autres ?","Quelle tâche jugée « impossible à automatiser » par vos équipes mériterait un essai quand même ?"]},
@@ -511,7 +511,7 @@ function pickMode(m){
   idc.classList.remove('hidden');
   document.getElementById('idnote').innerHTML = (m === 'client')
     ? "Pré-diagnostic <b>avant l'audit</b> : 25 questions (~10 min). À la fin, un <b>code de restitution</b> vous sera fourni — envoyez-le à votre auditeur ITICIA par e-mail."
-    : "🧑‍🏫 <b>Mode auditeur ITICIA.</b> Remplissez les champs, puis lancez le diagnostic en séance avec le dirigeant. <b>Si le dirigeant a déjà envoyé son code de pré-diagnostic</b> (commence par ITICIA-J1-), collez-le ci-dessous : le diagnostic complet s'affichera instantanément.";
+    : "🧑‍🏫 <b>Mode auditeur ITICIA.</b> Remplissez les champs, puis lancez le diagnostic en séance avec l'organisation. <b>Si le pré-diagnostic a déjà été rempli de pré-diagnostic</b> (commence par ITICIA-J1-), collez-le ci-dessous : le diagnostic complet s'affichera instantanément.";
   document.getElementById('pastewrap2').classList.toggle('hidden', m !== 'anim');
   document.getElementById('startbtn').textContent = (m === 'client') ? 'Commencer le pré-diagnostic →' : "Commencer l'audit en séance →";
   if (m === 'anim') document.getElementById('stepsnav').style.display = '';
