@@ -84,12 +84,12 @@
     <div class="q-title">Qui êtes-vous ?</div>
     <div class="mode-grid">
       <div class="mode-btn" onclick="pickMode('client')">
-        <div class="t">🎯 Je suis le dirigeant / la dirigeante</div>
-        <div class="d">Je remplis le pré-diagnostic en amont de l'audit (5 minutes). À la fin, j'obtiens un code de restitution à envoyer à l'auditeur ITICIA.</div>
+        <div class="t">🎯 Je représente mon organisation</div>
+        <div class="d">RH, DSI, responsable de formation ou dirigeant : je remplis le pré-diagnostic en amont de l'audit (5 minutes) et j'obtiens un code de restitution à envoyer à l'auditeur ITICIA.</div>
       </div>
       <div class="mode-btn" onclick="pickMode('anim')">
         <div class="t">🧑‍🏫 Je suis l'auditeur ITICIA</div>
-        <div class="d">Je charge le pré-diagnostic du dirigeant (son code) pour obtenir le guide d'entretien en séance, ou je mène le diagnostic classique si aucun pré-audit n'a été fait.</div>
+        <div class="d">Je charge le pré-diagnostic rempli en amont (son code) pour obtenir le guide d'entretien en séance, ou je mène le diagnostic classique si aucun pré-audit n'a été fait.</div>
       </div>
     </div>
   </div>
@@ -105,8 +105,8 @@
     <p class="note" id="idnote"></p>
 
     <div id="pastewrap2" class="hidden">
-      <div class="q-title" style="font-size:16px;">📋 Le dirigeant a déjà envoyé son code ?</div>
-      <textarea id="codein" class="paste" placeholder="Collez ici le code de restitution du dirigeant (commence par ITICIA-DJ-)"></textarea>
+      <div class="q-title" style="font-size:16px;">📋 Le pré-diagnostic a déjà été rempli ?</div>
+      <textarea id="codein" class="paste" placeholder="Collez ici le code de restitution de l'organisation (commence par ITICIA-DJ-)"></textarea>
       <div class="err hidden" id="pasteerr"></div>
       <div class="btnrow">
         <span></span>
@@ -137,7 +137,7 @@
   <div id="iguide" class="hidden">
     <div class="card">
       <div class="q-title">Constat du pré-diagnostic — <span id="igname"></span></div>
-      <p class="note"> scores issus du questionnaire rempli en amont par le dirigeant. Le guide d'entretien ci-dessous s'appuie sur ce constat : les dimensions sont classées de la plus faible à la plus solide, avec des questions différentes du pré-diagnostic.</p>
+      <p class="note"> scores issus du questionnaire rempli en amont par l'organisation. Le guide d'entretien ci-dessous s'appuie sur ce constat : les dimensions sont classées de la plus faible à la plus solide, avec des questions différentes du pré-diagnostic.</p>
       <div class="prescore" id="prescore"></div>
     </div>
     <div class="card">
@@ -300,7 +300,7 @@ function pickMode(m){
   document.getElementById('idtitle').textContent = (m === 'client') ? 'Pré-diagnostic — 5 minutes' : 'Audit IA en séance — identité';
   document.getElementById('idnote').innerHTML = (m === 'client')
     ? "Merci de répondre spontanément : il n'y a pas de bonne réponse, c'est un point de départ, pas un examen.<br>À la fin, un <b>code de restitution</b> s'affichera : envoyez-le par e-mail à votre auditeur ITICIA (Sully Capron — sully.capron@universite-lyon.fr) avant la date de l'audit."
-    : "Saisissez l'identité du client audit\u00e9. Si le dirigeant a d\u00e9j\u00e0 rempli le pr\u00e9-diagnostic, collez son code ci-dessous : l'outil g\u00e9n\u00e9rera le guide d'entretien adapt\u00e9 \u00e0 son constat. Sinon, lancez le questionnaire classique en s\u00e9ance (bulles d'animation incluses).";
+    : "Saisissez l'identité du client audit\u00e9. Si le pr\u00e9-diagnostic a d\u00e9j\u00e0 \u00e9t\u00e9 rempli, collez son code ci-dessous : l'outil g\u00e9n\u00e9rera le guide d'entretien adapt\u00e9 \u00e0 son constat. Sinon, lancez le questionnaire classique en s\u00e9ance (bulles d'animation incluses).";
   document.getElementById('startbtn').textContent = (m === 'client')
     ? "Commencer le pré-diagnostic →"
     : "Sans code : questionnaire en séance →";
@@ -456,7 +456,7 @@ function showResults(interview){
   document.getElementById('iguide').classList.add('hidden');
   const rc = document.getElementById('rescard');
   rc.classList.remove('hidden');
-  document.getElementById('restitle').textContent = fromCode ? 'Restitution — diagnostic du dirigeant' : (interview ? 'Restitution de l\u2019audit' : 'Résultats du diagnostic');
+  document.getElementById('restitle').textContent = fromCode ? 'Restitution — pré-diagnostic de l'organisation' : (interview ? 'Restitution de l\u2019audit' : 'Résultats du diagnostic');
   document.getElementById('resmeta').textContent = (document.getElementById('cname').value || '') + ' · ' + (document.getElementById('cpers').value || '') + ' · ' + (document.getElementById('cdate').value || '');
   document.getElementById('scorenum').textContent = Math.round(s.pct) + '%';
   document.getElementById('scorelvl').textContent = 'Niveau : ' + lvl.n;
