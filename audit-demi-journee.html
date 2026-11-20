@@ -456,7 +456,7 @@ function showResults(interview){
   document.getElementById('iguide').classList.add('hidden');
   const rc = document.getElementById('rescard');
   rc.classList.remove('hidden');
-  document.getElementById('restitle').textContent = fromCode ? 'Restitution — pré-diagnostic de l'organisation' : (interview ? 'Restitution de l\u2019audit' : 'Résultats du diagnostic');
+  document.getElementById('restitle').textContent = fromCode ? 'Restitution — pré-diagnostic de l\'organisation' : (interview ? 'Restitution de l\u2019audit' : 'Résultats du diagnostic');
   document.getElementById('resmeta').textContent = (document.getElementById('cname').value || '') + ' · ' + (document.getElementById('cpers').value || '') + ' · ' + (document.getElementById('cdate').value || '');
   document.getElementById('scorenum').textContent = Math.round(s.pct) + '%';
   document.getElementById('scorelvl').textContent = 'Niveau : ' + lvl.n;
